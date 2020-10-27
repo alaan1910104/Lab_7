@@ -20,6 +20,7 @@ import java.io.IOException;
 public class StageManager {
 
     private Stage pStage;
+    private Scene mainScene;
     private FileChooser fc;
     private File mainFile;
     private GraphMaker graphMaker;
@@ -30,8 +31,9 @@ public class StageManager {
         this.fc = new FileChooser();
         this.graphMaker = new GraphMaker();
         this.mainChart = null;
+        this.mainScene = init();
 
-        pStage.setScene(init());
+        pStage.setScene(this.mainScene);
     }
 
     // creer les éléments necessaires
@@ -65,6 +67,7 @@ public class StageManager {
     private VBox createMenu(Menu menu){
         VBox graphBox = new VBox();
 
+        // Graph de Ligne
         MenuItem lineMenu = new MenuItem("Line");
         lineMenu.setOnAction(event -> {
             importPopUp();
@@ -76,6 +79,7 @@ public class StageManager {
             graphBox.getChildren().add(this.mainChart);
         });
 
+        // graph de area
         MenuItem areaMenu = new MenuItem("Area");
         areaMenu.setOnAction(event -> {
             importPopUp();
@@ -87,6 +91,7 @@ public class StageManager {
             graphBox.getChildren().add(this.mainChart);
         });
 
+        // graph de barres
         MenuItem barMenu = new MenuItem("Bar");
         barMenu.setOnAction(event -> {
             importPopUp();
@@ -105,6 +110,7 @@ public class StageManager {
         return graphBox;
     }
 
+
     // pop up pour selectioner le file a ouvrir
     private void importPopUp(){
         this.fc.setTitle("Selectioner un file à ouvrir.");
@@ -113,16 +119,19 @@ public class StageManager {
         this.mainFile = this.fc.showOpenDialog(this.pStage);
     }
 
+
     // pop up pour selectioner le dossier pour sauvre-garder
     private File exportPopUp(){
         this.fc.setTitle("Selectioner un dossier pour sauve-garder.");
-        this.fc.getExtensionFilters().removeAll();
+        this.fc.getExtensionFilters().remove(0);
         this.fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image", "*.png"));
         return this.fc.showSaveDialog(this.pStage);
     }
 
+
+    // sauve-garder une image dans le dossier choisi
     private void save(){
-            WritableImage image = this.mainChart.snapshot(new SnapshotParameters(), null);
+            WritableImage image = this.mainScene.snapshot(null);
             File file = exportPopUp();
             try {
                 ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);

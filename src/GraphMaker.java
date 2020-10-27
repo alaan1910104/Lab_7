@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 
 public class GraphMaker {
 
+    public class fileException extends Exception{};
+
+    // creer un chart d'un type especifié
     public Chart createChart(File mainFile, String type) throws IOException {
         final CategoryAxis xAxis = new CategoryAxis();
         final NumberAxis yAxis = new NumberAxis();
@@ -18,7 +21,7 @@ public class GraphMaker {
         xAxis.setLabel("Months");
         yAxis.setLabel("Temperature");
 
-        XYChart chart;
+        XYChart<String, Number> chart;
 
         switch (type){
             case "line": chart = new LineChart<>(xAxis, yAxis);
@@ -33,7 +36,15 @@ public class GraphMaker {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Temperature par mois");
 
-        series.getData().addAll(read(mainFile));
+
+        try{
+         series.getData().addAll(read(mainFile));
+        }
+        catch (fileException ex){
+            System.out.print("Il y a un problème avec le File, assurez-vous de suivre le format: " +
+                    "\n mois1,mois2,mois3,..." +
+                    "\nnumb1,numb2,numb3,...");
+        }
 
         chart.getData().add(series);
 
@@ -41,10 +52,12 @@ public class GraphMaker {
     }
 
 
-    private List<XYChart.Data<String, Number>> read(File mainFile) throws IOException {
+    // lire les 2 premieres lignes du file, et retuner une liste avec string et Number, pour les series du chart
+    private List<XYChart.Data<String, Number>> read(File mainFile) throws IOException, fileException {
 
         List<XYChart.Data<String, Number>> mainList = new ArrayList<>();
 
+        // checker si le file n'est pas vide et s'il
         if(!Files.readAllLines(mainFile.toPath()).isEmpty()) {
             List<String> strings =
                     Arrays.asList(Files.readAllLines(mainFile.toPath()).get(0).split(","));
@@ -59,7 +72,9 @@ public class GraphMaker {
                     mainList.add(new XYChart.Data<>(strings.get(counter), numbers.get(counter)));
                 }
             }
+            else{ throw new fileException();}
         }
+        else{throw new fileException();}
 
         return mainList;
     }
